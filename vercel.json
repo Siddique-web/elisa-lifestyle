@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "npm install --prefix backend --omit=dev && npm install --prefix frontend",
-  "buildCommand": "npm --prefix frontend run build",
-  "outputDirectory": "frontend/dist",
+  "installCommand": "bash ../install-vercel.sh || bash ./install-vercel.sh",
+  "buildCommand": "if [ -f vite.config.js ]; then npm run build; else npm --prefix frontend run build && rm -rf dist && cp -a frontend/dist dist; fi",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
