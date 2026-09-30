@@ -15,16 +15,20 @@ const app = express();
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || true }));
 app.use(express.json());
 
-app.use('/api/appointments', appointmentsRouter);
-app.use('/api/services', servicesRouter);
-app.use('/api/staff', staffRouter);
-app.use('/api/reports', reportsRouter);
-app.use('/api/agendamentos', agendamentosRouter);
-app.use('/api/servicos', servicosRouter);
+function mountApi(prefix) {
+  app.use(`${prefix}/appointments`, appointmentsRouter);
+  app.use(`${prefix}/services`, servicesRouter);
+  app.use(`${prefix}/staff`, staffRouter);
+  app.use(`${prefix}/reports`, reportsRouter);
+  app.use(`${prefix}/agendamentos`, agendamentosRouter);
+  app.use(`${prefix}/servicos`, servicosRouter);
+  app.get(`${prefix}/health`, (req, res) =>
+    res.json({ status: 'ok', storage: isMongoReady() ? 'mongodb' : 'memory' })
+  );
+}
 
-app.get('/api/health', (req, res) =>
-  res.json({ status: 'ok', storage: isMongoReady() ? 'mongodb' : 'memory' })
-);
+mountApi('/api');
+mountApi('');
 
 let mongoStarted = false;
 function ensureMongo() {
