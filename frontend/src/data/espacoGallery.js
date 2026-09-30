@@ -47,7 +47,7 @@ export const FOTOS_ESPACO = [
     alt: 'Equipa Elisa Lifestyle no salão',
     titulo: 'A nossa equipa',
     texto: 'Profissionais dedicados a realçar a sua beleza com carinho e excelência.',
-    focal: 'object-cover object-[center_22%]',
+    focal: 'object-cover object-top',
   },
 ];
 

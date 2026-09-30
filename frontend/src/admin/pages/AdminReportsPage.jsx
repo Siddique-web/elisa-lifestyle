@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../lib/api';
+import { getSocket } from '../../lib/socket';
 import ExportReports from '../components/ExportReports';
 import {
   PeakHoursBarChart,
@@ -15,26 +16,41 @@ export default function AdminReportsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const [vol, tr, st] = await Promise.all([
-          api.getReportsVolume({ groupBy }),
-          api.getReportsTrends({}),
-          api.getReportsStatusSummary({}),
-        ]);
-        setVolume(vol);
-        setTrends(tr);
-        setStatusSummary(st);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    setError('');
+    try {
+      const [vol, tr, st] = await Promise.all([
+        api.getReportsVolume({ groupBy }),
+        api.getReportsTrends({}),
+        api.getReportsStatusSummary({}),
+      ]);
+      setVolume(vol);
+      setTrends(tr);
+      setStatusSummary(st);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [groupBy]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    const refresh = () => load(true);
+    socket.on('new-appointment', refresh);
+    socket.on('status-updated', refresh);
+    socket.on('staff-assigned', refresh);
+    return () => {
+      socket.off('new-appointment', refresh);
+      socket.off('status-updated', refresh);
+      socket.off('staff-assigned', refresh);
+    };
+  }, [load]);
 
   return (
     <div className="space-y-6">
@@ -42,7 +58,7 @@ export default function AdminReportsPage() {
         <div>
           <h2 className="section-title">Relatórios & AI Insights</h2>
           <p className="section-sub">
-            Últimos 30 dias · previsões com base na média móvel recente
+            Últimos 30 dias e próximos 14 · previsões com base na média móvel recente
           </p>
         </div>
         <ExportReports volume={volume} trends={trends} statusSummary={statusSummary} />

@@ -16,6 +16,7 @@ export default function Home() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [paraAgendar, setParaAgendar] = useState([]);
   const [mensagemOk, setMensagemOk] = useState('');
+  const [catalogKey, setCatalogKey] = useState(0);
 
   useEffect(() => {
     fetch(`${API_URL}/api/servicos`)
@@ -34,6 +35,8 @@ export default function Home() {
   };
 
   const handleBookingSuccess = () => {
+    setParaAgendar([]);
+    setCatalogKey((n) => n + 1);
     setMensagemOk('Agendamento enviado! A equipa confirmará em breve.');
     setTimeout(() => setMensagemOk(''), 6000);
   };
@@ -54,7 +57,7 @@ export default function Home() {
       <HorizontalGallery servicos={servicos} />
       <PromoBanner />
 
-      <CatalogoServicos servicos={servicos} onAgendar={handleAgendar} />
+      <CatalogoServicos key={catalogKey} servicos={servicos} onAgendar={handleAgendar} />
 
       <BookingModal
         open={bookingOpen}

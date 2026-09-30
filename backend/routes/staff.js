@@ -23,6 +23,12 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
+    if (!isMongoReady()) {
+      const member = memory.findStaffById(req.params.id);
+      if (!member) return res.status(404).json({ erro: 'Profissional não encontrado.' });
+      return res.json(member);
+    }
+
     const member = await Staff.findById(req.params.id);
     if (!member) return res.status(404).json({ erro: 'Profissional não encontrado.' });
     res.json(member);
@@ -34,6 +40,9 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
+    if (!isMongoReady()) {
+      return res.status(201).json(memory.createStaff(req.body));
+    }
     const member = await Staff.create(req.body);
     res.status(201).json(member);
   } catch (err) {
@@ -44,6 +53,11 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
+    if (!isMongoReady()) {
+      const member = memory.updateStaff(req.params.id, req.body);
+      if (!member) return res.status(404).json({ erro: 'Profissional não encontrado.' });
+      return res.json(member);
+    }
     const member = await Staff.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
@@ -58,6 +72,11 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
+    if (!isMongoReady()) {
+      const member = memory.updateStaff(req.params.id, { active: false });
+      if (!member) return res.status(404).json({ erro: 'Profissional não encontrado.' });
+      return res.json(member);
+    }
     const member = await Staff.findByIdAndUpdate(
       req.params.id,
       { active: false },

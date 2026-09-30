@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../../lib/api';
+import { getSocket } from '../../lib/socket';
 import { WEEK_DAYS, formatDateTime } from '../constants';
 
 const HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
@@ -20,22 +21,38 @@ export default function StaffScheduleMatrix() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const [staffData, apptData] = await Promise.all([
-          api.getStaff(),
-          api.getAppointments(),
-        ]);
-        setStaff(staffData);
-        setAppointments(apptData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
+  const load = useCallback(async () => {
+    try {
+      const [staffData, apptData] = await Promise.all([
+        api.getStaff(),
+        api.getAppointments(),
+      ]);
+      setStaff(staffData);
+      setAppointments(apptData);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    const socket = getSocket();
+    const refresh = () => load();
+    socket.on('new-appointment', refresh);
+    socket.on('status-updated', refresh);
+    socket.on('staff-assigned', refresh);
+    return () => {
+      socket.off('new-appointment', refresh);
+      socket.off('status-updated', refresh);
+      socket.off('staff-assigned', refresh);
+    };
+  }, [load]);
 
   const allocationMap = useMemo(() => {
     const map = new Map();
@@ -73,7 +90,7 @@ export default function StaffScheduleMatrix() {
         <div className="border-b border-brand-100 px-5 py-4">
           <h2 className="text-lg font-bold text-ink-900">Disponibilidade semanal</h2>
           <p className="text-sm text-ink-500">
-            Rosa claro = disponível · Magenta = cliente alocado
+            Rosa claro = disponível · Destaque = cliente alocado
           </p>
         </div>
         <div className="overflow-x-auto">

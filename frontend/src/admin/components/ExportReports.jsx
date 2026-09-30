@@ -5,6 +5,7 @@ import { api } from '../../lib/api';
 
 function defaultRange() {
   const to = new Date();
+  to.setDate(to.getDate() + 14);
   const from = new Date();
   from.setDate(from.getDate() - 30);
   return {

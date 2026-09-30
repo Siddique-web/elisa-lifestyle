@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { randomUUID } = require('crypto');
 
 const APPOINTMENT_STATUSES = [
@@ -63,17 +65,60 @@ const defaultStaff = [
   },
 ];
 
+const STORE_FILE = path.join(__dirname, '..', 'data', 'local-store.json');
+
+function persist() {
+  try {
+    const payload = {
+      appointments: state.appointments,
+      staff: state.staff,
+    };
+    fs.mkdirSync(path.dirname(STORE_FILE), { recursive: true });
+    fs.writeFileSync(STORE_FILE, JSON.stringify(payload, null, 0));
+  } catch (err) {
+    console.warn('Não foi possível gravar dados locais:', err.message);
+  }
+}
+
+function loadPersisted() {
+  try {
+    if (!fs.existsSync(STORE_FILE)) return;
+    const raw = JSON.parse(fs.readFileSync(STORE_FILE, 'utf8'));
+    if (Array.isArray(raw.appointments)) state.appointments = raw.appointments;
+    if (Array.isArray(raw.staff) && raw.staff.length) state.staff = raw.staff;
+  } catch (err) {
+    console.warn('Não foi possível ler dados locais:', err.message);
+  }
+}
+
 const state = {
   appointments: [],
   staff: [...defaultStaff],
 };
 
+loadPersisted();
+if (!fs.existsSync(STORE_FILE)) persist();
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function toIso(value) {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function staffRef(value) {
+  if (!value) return null;
+  if (typeof value === 'object') return value._id || null;
+  return value;
+}
+
 function findStaffById(id) {
-  const member = state.staff.find((s) => s._id === id);
+  const key = staffRef(id);
+  if (!key) return null;
+  const member = state.staff.find((s) => s._id === key);
   return member ? clone(member) : null;
 }
 
@@ -81,6 +126,27 @@ function listStaff({ activeOnly = true } = {}) {
   let list = state.staff;
   if (activeOnly) list = list.filter((s) => s.active !== false);
   return clone(list.sort((a, b) => a.name.localeCompare(b.name)));
+}
+
+function createStaff(payload) {
+  const member = {
+    _id: `staff-${randomUUID()}`,
+    name: payload.name || 'Profissional',
+    role: payload.role || 'Equipa',
+    active: payload.active !== false,
+    schedule: Array.isArray(payload.schedule) ? payload.schedule : [],
+  };
+  state.staff.push(member);
+  persist();
+  return clone(member);
+}
+
+function updateStaff(id, updates) {
+  const idx = state.staff.findIndex((s) => s._id === id);
+  if (idx === -1) return null;
+  state.staff[idx] = { ...state.staff[idx], ...updates, _id: id };
+  persist();
+  return clone(state.staff[idx]);
 }
 
 function listAppointments(filter = {}) {
@@ -98,15 +164,20 @@ function listAppointments(filter = {}) {
     });
   }
 
-  return clone(list.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime)));
+  return clone(
+    list
+      .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+      .map(populateStaff)
+  );
 }
 
 function populateStaff(appointment) {
-  if (!appointment.staffMember) return appointment;
-  const member = findStaffById(appointment.staffMember);
+  const id = staffRef(appointment.staffMember);
+  if (!id) return { ...appointment, staffMember: null };
+  const member = findStaffById(id);
   return {
     ...appointment,
-    staffMember: member || appointment.staffMember,
+    staffMember: member || null,
   };
 }
 
@@ -115,12 +186,15 @@ function createAppointment(payload) {
   const appointment = {
     _id: `mem-${randomUUID()}`,
     ...payload,
+    dateTime: toIso(payload.dateTime) || payload.dateTime,
+    staffMember: staffRef(payload.staffMember),
     status: payload.status || 'Pendente',
     createdAt: now,
     updatedAt: now,
   };
 
   state.appointments.unshift(appointment);
+  persist();
   return clone(populateStaff(appointment));
 }
 
@@ -139,6 +213,7 @@ function updateAppointmentStatus(id, status) {
     updatedAt: new Date().toISOString(),
   };
 
+  persist();
   return clone(populateStaff(state.appointments[idx]));
 }
 
@@ -148,9 +223,10 @@ function updateAppointment(id, updates) {
 
   const nextUpdates = { ...updates };
   if (Object.prototype.hasOwnProperty.call(nextUpdates, 'staffMember')) {
-    const raw = nextUpdates.staffMember;
-    nextUpdates.staffMember =
-      raw && typeof raw === 'object' ? raw._id || null : raw || null;
+    nextUpdates.staffMember = staffRef(nextUpdates.staffMember);
+  }
+  if (Object.prototype.hasOwnProperty.call(nextUpdates, 'dateTime')) {
+    nextUpdates.dateTime = toIso(nextUpdates.dateTime) || nextUpdates.dateTime;
   }
 
   state.appointments[idx] = {
@@ -159,6 +235,7 @@ function updateAppointment(id, updates) {
     updatedAt: new Date().toISOString(),
   };
 
+  persist();
   return clone(populateStaff(state.appointments[idx]));
 }
 
@@ -170,6 +247,7 @@ function deleteAppointment(id) {
   const idx = state.appointments.findIndex((a) => a._id === id);
   if (idx === -1) return null;
   const [removed] = state.appointments.splice(idx, 1);
+  persist();
   return clone(removed);
 }
 
@@ -184,4 +262,6 @@ module.exports = {
   deleteAppointment,
   listStaff,
   findStaffById,
+  createStaff,
+  updateStaff,
 };

@@ -21,12 +21,12 @@ export default function HeroCarousel({ slides }) {
       className="relative overflow-hidden bg-hero-glow pt-16"
       aria-label="Elisa Lifestyle — cabeleireiro, boutique e spa"
     >
-      <div className="relative mx-auto grid max-w-6xl items-start gap-6 px-4 pb-10 pt-3 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:pb-12 lg:pt-4">
-        <div className="hero-enter-text order-2 flex flex-col justify-start lg:order-1 lg:pt-2">
+      <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:gap-12 lg:py-0">
+        <div className="hero-enter-text order-2 flex flex-col justify-center lg:order-1">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">
             Beira · Moçambique
           </p>
-          <h1 className="font-display mt-4 text-4xl font-semibold leading-tight text-ink-900 sm:text-5xl lg:text-[2.75rem] lg:leading-[1.15]">
+          <h1 className="font-display mt-3 text-[1.85rem] font-semibold leading-snug text-ink-900 sm:text-4xl lg:text-[2.35rem] lg:leading-[1.18]">
             Sinta o luxo de cuidar de si na{' '}
             <span className="text-brand-600">Elisa Lifestyle</span>
           </h1>
@@ -44,24 +44,33 @@ export default function HeroCarousel({ slides }) {
           </div>
         </div>
 
-        <div className="hero-enter-media relative order-1 flex flex-col items-center justify-start lg:order-2">
+        <div className="hero-enter-media relative order-1 flex flex-col items-center justify-center lg:order-2">
           <div className="hero-accent right-[6%] top-[8%] z-0 hidden h-[88%] w-[76%] lg:block" aria-hidden />
           <div className="relative z-10 w-full max-w-md lg:max-w-none">
             <div className="overflow-hidden rounded-3xl bg-white p-1.5 shadow-glow-lg sm:p-2">
-              <div className="relative aspect-[4/5] max-h-[min(70vh,520px)] w-full overflow-hidden rounded-[1.15rem] bg-nude-100">
-                {slides.map((s, i) => (
-                  <img
-                    key={`${s.src}-${i}`}
-                    src={s.src}
-                    alt={s.alt}
-                    decoding="async"
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                    sizes="(max-width: 1024px) 92vw, 480px"
-                    className={`absolute inset-0 h-full w-full object-cover object-[center_18%] transition-opacity duration-700 ${
-                      i === atual ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  />
-                ))}
+              <div className="relative aspect-[4/5] max-h-[min(62vh,480px)] w-full overflow-hidden rounded-[1.15rem] bg-nude-100">
+                {slides.map((s, i) => {
+                  const n = slides.length;
+                  const nearby =
+                    i === atual ||
+                    i === (atual + 1) % n ||
+                    i === (atual - 1 + n) % n;
+                  if (!nearby) return null;
+                  return (
+                    <img
+                      key={`${s.src}-${i}`}
+                      src={s.src}
+                      alt={s.alt}
+                      decoding="async"
+                      loading={i === 0 || i === atual ? 'eager' : 'lazy'}
+                      fetchPriority={i === atual ? 'high' : 'low'}
+                      sizes="(max-width: 1024px) 92vw, 480px"
+                      className={`absolute inset-0 h-full w-full object-cover object-[center_18%] transition-opacity duration-700 ${
+                        i === atual ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
+                  );
+                })}
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-primary/85 via-primary/25 to-transparent px-4 pb-4 pt-16">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
                     Destaque do salão

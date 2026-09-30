@@ -3,7 +3,7 @@ import { gsap, ScrollTrigger } from '../lib/gsap';
 import { scrollToSection } from '../lib/scrollToSection';
 import { FOTOS_ESPACO } from '../data/espacoGallery';
 
-function PainelFoto({ imagem, alt, titulo, texto, index }) {
+function PainelFoto({ imagem, alt, titulo, texto, focal, index }) {
   return (
     <article className="flex w-full flex-shrink-0 items-center justify-center px-4 py-2 sm:px-6 lg:h-full lg:w-[100vw] lg:max-w-[100vw] lg:px-8 lg:py-0">
       <div className="galeria-slide-frame relative mx-auto w-full max-w-6xl overflow-hidden rounded-3xl bg-primary shadow-glow ring-1 ring-black/5">
@@ -14,7 +14,7 @@ function PainelFoto({ imagem, alt, titulo, texto, index }) {
             decoding="async"
             loading={index <= 1 ? 'eager' : 'lazy'}
             sizes="(max-width: 1024px) 100vw, min(1152px, 92vw)"
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className={`absolute inset-0 h-full w-full object-cover ${focal || 'object-center'}`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/15 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 z-10 px-5 pb-6 pt-16 sm:px-10 sm:pb-8 lg:px-12 lg:pb-10">
