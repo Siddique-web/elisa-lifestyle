@@ -65,7 +65,9 @@ const defaultStaff = [
   },
 ];
 
-const STORE_FILE = path.join(__dirname, '..', 'data', 'local-store.json');
+const STORE_FILE = process.env.VERCEL
+  ? path.join('/tmp', 'elisa-local-store.json')
+  : path.join(__dirname, '..', 'data', 'local-store.json');
 
 function persist() {
   try {
@@ -97,7 +99,7 @@ const state = {
 };
 
 loadPersisted();
-if (!fs.existsSync(STORE_FILE)) persist();
+if (!process.env.VERCEL && !fs.existsSync(STORE_FILE)) persist();
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
