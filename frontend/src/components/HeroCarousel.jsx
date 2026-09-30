@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { scrollToSection } from '../lib/scrollToSection';
 
-const INTERVALO_MS = 5000;
+const INTERVALO_MS = 4000;
 const VISIVEIS = 3; // quantos cartões de cada lado existem no DOM (o último é só para a transição)
 
 // Posição de cada cartão conforme a distância ao cartão central.
@@ -169,9 +169,20 @@ export default function HeroCarousel({ slides }) {
           >
             <ChevronLeft size={18} strokeWidth={1.5} />
           </button>
-          <span className="min-w-[3.5rem] text-center text-xs font-medium tabular-nums text-ink-500">
-            {atual + 1} / {n}
-          </span>
+          <div className="flex min-w-0 max-w-[14rem] flex-wrap items-center justify-center gap-1.5">
+            {slides.map((s, i) => (
+              <button
+                key={s.src}
+                type="button"
+                onClick={() => ir(i)}
+                aria-label={`Foto ${i + 1}`}
+                aria-current={i === atual}
+                className={`h-2 rounded-full transition-all ${
+                  i === atual ? 'w-7 bg-accent' : 'w-2 bg-secondary hover:bg-accent'
+                }`}
+              />
+            ))}
+          </div>
           <button
             type="button"
             onClick={proximo}
