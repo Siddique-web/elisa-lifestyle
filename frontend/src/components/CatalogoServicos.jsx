@@ -74,7 +74,7 @@ export default function CatalogoServicos({ servicos, onAgendar }) {
           </button>
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {categoriasComItens.map((cat) => {
             const n = servicos.filter((s) => s.categoria === cat.chave).length;
             const activa = categoriaActiva === cat.chave;
@@ -100,8 +100,8 @@ export default function CatalogoServicos({ servicos, onAgendar }) {
         </div>
       </div>
 
-      <div className="mx-auto mt-8 grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="space-y-8">
+      <div className="mx-auto mt-8 grid max-w-6xl grid-cols-1 gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0 space-y-8">
           {categoriasComItens.map((cat, idx) => {
             const itens = servicos.filter((s) => s.categoria === cat.chave);
             return (
@@ -117,7 +117,7 @@ export default function CatalogoServicos({ servicos, onAgendar }) {
                   id={`cat-${cat.chave}`}
                   className="overflow-hidden rounded-3xl bg-white shadow-glow ring-1 ring-secondary/25"
                 >
-                  <div className="grid lg:grid-cols-[220px_minmax(0,1fr)]">
+                  <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)]">
                     <div className="flex flex-col justify-between bg-primary p-6 text-light-bg sm:p-7">
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
@@ -136,7 +136,7 @@ export default function CatalogoServicos({ servicos, onAgendar }) {
                       </div>
                     </div>
 
-                    <div className="relative bg-nude-50 py-5">
+                    <div className="relative min-w-0 bg-nude-50 py-5">
                       <div className="mb-3 flex items-center justify-between px-5">
                         <p className="text-xs font-semibold uppercase tracking-wider text-primary">
                           {cat.titulo}

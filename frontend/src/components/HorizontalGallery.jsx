@@ -36,7 +36,7 @@ function PainelFoto({ imagem, alt, titulo, texto, focal, index }) {
 
 function PainelColecao({ titulo, texto, contagem, anchorId, imagem }) {
   return (
-    <article className="collection-card mx-4 flex-shrink-0 sm:mx-6 lg:mx-0 lg:mr-8">
+    <article className="collection-card flex-shrink-0 lg:mr-8">
       {imagem && (
         <img
           src={imagem}

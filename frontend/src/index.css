@@ -4,6 +4,8 @@
 
 html {
   scroll-behavior: auto;
+  color-scheme: only light;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -11,6 +13,7 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   color: #1A1A1A;
   background-color: #F9F8F6;
+  overflow-x: clip;
 }
 
 @layer components {

@@ -42,12 +42,12 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-light-bg">
+    <main className="min-h-screen overflow-x-clip bg-light-bg">
       <PageEntrance />
       <Navbar />
 
       {mensagemOk && (
-        <div className="fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-marrom-800 px-6 py-3 text-sm font-medium text-nude-50 shadow-glow-lg">
+        <div className="fixed bottom-6 left-1/2 z-[70] w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-full bg-marrom-800 px-6 py-3 text-center text-sm font-medium text-nude-50 shadow-glow-lg">
           {mensagemOk}
         </div>
       )}
